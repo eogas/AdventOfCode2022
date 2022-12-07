@@ -6,56 +6,61 @@ foreach (var line in allLines)
 {
     var symbols = line.Split(" ");
     var opponentMove = ShapeFromSymbol(symbols[0]);
-    var myMove = ShapeFromSymbol(symbols[1]);
+    var desiredResult = ResultFromSymbol(symbols[1]);
+    var myMove = ShapeForResult(opponentMove, desiredResult);
 
-    totalScore += MoveScore(myMove) + (int)OutcomeScore(opponentMove, myMove);
+    totalScore += (int)desiredResult + (int)myMove;
 }
 
 Console.WriteLine(totalScore);
 
-Shape ShapeFromSymbol(string symbol) {
+Shape ShapeFromSymbol(string symbol)
+{
     switch (symbol)
     {
-        case "A":
-        case "X":
-            return Shape.Rock;
-            
-        case "B":
-        case "Y":
-            return Shape.Paper;
-            
-        case "C":
-        case "Z":
-            return Shape.Scissors;
+        case "A": return Shape.Rock;
+        case "B": return Shape.Paper;
+        case "C": return Shape.Scissors;
+        default: throw new Exception();
+    }
+}
+
+Shape ShapeForResult(Shape opponentShape, Result desiredResult)
+{
+    switch (desiredResult)
+    {
+        case Result.Loss:
+            switch (opponentShape)
+            {
+                case Shape.Rock: return Shape.Scissors;
+                case Shape.Paper: return Shape.Rock;
+                case Shape.Scissors: return Shape.Paper;
+                default: throw new Exception();
+            }
+        case Result.Draw:
+            return opponentShape;
+        case Result.Win:
+            switch (opponentShape)
+            {
+                case Shape.Rock: return Shape.Paper;
+                case Shape.Paper: return Shape.Scissors;
+                case Shape.Scissors: return Shape.Rock;
+                default: throw new Exception();
+            }
         default:
             throw new Exception();
     }
 }
 
-Result OutcomeScore(Shape opponentMove, Shape myMove)
-{
-    if (opponentMove == myMove) {
-        return Result.Draw; //draw
-    }
-
-    if (opponentMove == Shape.Rock && myMove == Shape.Scissors ||
-        opponentMove == Shape.Paper && myMove == Shape.Rock ||
-        opponentMove == Shape.Scissors && myMove == Shape.Paper)
+Result ResultFromSymbol(string symbol) {
+    switch (symbol)
     {
-        return Result.Loss; // loss
+        case "X": return Result.Loss;
+        case "Y": return Result.Draw;
+        case "Z": return Result.Win;
+        default: throw new Exception(); // this shan't happen
     }
-
-    if (opponentMove == Shape.Scissors && myMove == Shape.Rock ||
-        opponentMove == Shape.Rock && myMove == Shape.Paper ||
-        opponentMove == Shape.Paper && myMove == Shape.Scissors)
-    {
-        return Result.Win; // win
-    }
-
-    return Result.Draw; // this shan't happen
 }
-
-int MoveScore(Shape move) => (int)move;
 
 enum Shape { Rock = 1, Paper = 2, Scissors = 3 }
 enum Result { Loss = 0, Draw = 3, Win = 6 }
